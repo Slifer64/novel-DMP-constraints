@@ -1,0 +1,48 @@
+q_start: [-1.11, -2.03, -1.54, -1.14, 1.54, -1.56]
+
+target_tag_id: 0
+target_offset: [ 0, 0.09, 0.11 ] # w.r.t. the base frame
+
+Tf_per_meter: 4.0
+Tf_update_gain: 1.0
+
+pos_lim:
+[
+  [ -0.65 , 0.45],    # [x_min x_max]
+  [ -0.75 , 0.05],    # [y_min y_max]
+  [  0.08 , 0.6],  # [z_min z_max]
+]
+
+vel_lim:
+[
+  [ -0.35 , 0.35 ]
+]
+
+accel_lim:
+[
+  [ -0.65 , 0.65 ]
+]
+
+
+mpc_settings:
+  {
+    N_horizon: 10 ,
+    pred_time_step: 0.1 ,
+    N_kernels: 30 ,
+    kernels_std_scaling: 1.5 ,
+
+    kernels_trunc_thres: 1e-6 ,
+
+    opt_pos_gain: 0.0 ,
+    opt_vel_gain: 1.0 ,
+
+    final_state_err_tol: [1e-2, 1e-2, 5e-2] ,
+
+    slack_gains: [1e5, 100, 1] , # [1e5, 100, 1]
+    slack_limits: [3e-2, 0.1, 1.0] ,
+
+    time_limit: 0 , #1.8e-3 ,
+    max_iter: 12000 ,
+    abs_tol: 1e-3 ,
+    rel_tol: 1e-5
+  }
