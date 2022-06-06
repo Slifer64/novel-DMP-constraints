@@ -10,8 +10,10 @@ load('data/obs_avoid_data', 'sd_data', 'Pd_data')
 n_dof = size(Pd_data, 1);
 
 ellipsoid = {};
-ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(45, 0.15, 0.08), 'c',[-0.1; 0.3])}];
-ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(-45, 0.1, 0.06), 'c',[0.18; 0.61])}];
+% ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(45, 0.15, 0.08), 'c',[-0.1; 0.3])}];
+% ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(-45, 0.1, 0.06), 'c',[0.18; 0.61])}];
+ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(45, 0.19, 0.06), 'c',[-0.14; 0.28])}];
+ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(-40, 0.13, 0.07), 'c',[0.16; 0.61])}];
 ellipsoid_colors = {[1.0, 0.4, 0], [0.4, 0.2, 0]};
 
 for i=1:length(ellipsoid)  
@@ -27,13 +29,16 @@ gmp = GMP(2, 30, 1.5);
 train_err = gmp.train('LS', sd_data, Pd_data)
 for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
 
-% P_data = [];
-% for i=1:length(sd_data)
-%     P_data = [P_data gmp.getYd(sd_data(i))];
-% end
 % figure; hold on;
-% plot(P_data(1,:), P_data(2,:));
-% plot(Pd_data(1,:), Pd_data(2,:));
+% plot(Pd_data(1, :), Pd_data(2, :), 'LineWidth',2);
+% plot(Pd_data(1, 1), Pd_data(2, 1), 'LineWidth',2, 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14);
+% plot(Pd_data(1, end), Pd_data(2, end), 'LineWidth',2, 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14);
+% for i=1:length(ellipsoid)
+%     plot(E_p{i}(1,:), E_p{i}(2,:), 'LineWidth',2, 'Color',ellipsoid_colors{i});
+%     plot(ellipsoid{i}.c(1), ellipsoid{i}.c(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color',ellipsoid_colors{i});
+% end
+% axis equal
+% return
 
 %% -------- Limits ---------
 pos_lim = [
@@ -48,8 +53,8 @@ accel_lim = repmat([ -2.5 , 2.5 ], n_dof, 1);
 % pos_lim = pos_lim + repmat([-1 1], n_dof, 1); % to augment the limits
 
 %% --------- Optimization objective ----------
-opt_pos = 0;
-opt_vel = 1;
+opt_pos = 1;
+opt_vel = 0;
 
 %% -------- Initial/Final states --------
 y0 = Pd_data(:, 1);

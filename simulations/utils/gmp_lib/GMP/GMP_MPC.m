@@ -285,12 +285,12 @@ classdef GMP_MPC < handle
         function plot_obstacle_constr(this, si_data)
             
             delete(this.plt_handles);
-
+            
             this.p_h.XData = [this.p_h.XData this.x0(1)];
             this.p_h.YData = [this.p_h.YData this.x0(2)];
             
             this.plt_show_count = this.plt_show_count + 1;
-            if (this.plt_show_count < 10), return; end
+            if (this.plt_show_count < 5), return; end
      
             %s_next = linspace(si_data(1), si_data(end), 30);
             s_next = si_data;
