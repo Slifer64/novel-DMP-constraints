@@ -94,6 +94,7 @@ end
 
 %% ---------- GMP with repulsive forces ------------
 if (dmp_rf)
+    disp('GMP with repulsive forces in progress...');
     [Time, P_data, dP_data, ddP_data] = gmpWithRepulsiveForces(gmp, tau, y0, yg0, yg, t_g, pos_lim, vel_lim, accel_lim);
     data{length(data)+1} = ...
         struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle','-', ...

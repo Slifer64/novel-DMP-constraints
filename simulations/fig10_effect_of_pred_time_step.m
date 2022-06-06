@@ -59,6 +59,7 @@ data{length(data)+1} = ...
 %% ---------- GMP-MPC optimization ------------
 
 % large time step
+disp('Test 1/3: dt=0.1 , N=10 (large time step, normal horizon)');
 [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, tau, y0, yg, pos_lim, vel_lim, accel_lim, opt_pos, opt_vel, 0.1, 10);
 
 data{length(data)+1} = ...
@@ -66,6 +67,7 @@ data{length(data)+1} = ...
     'color',[0.72 0.27 1], 'legend',['$dt=0.1 , N=10$'], 'plot3D',true, 'plot2D',true);
 
 % small time step
+disp('Test 2/3: dt=0.01 , N=10 (small time step, normal horizon)');
 [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, tau, y0, yg, pos_lim, vel_lim, accel_lim, opt_pos, opt_vel, 0.01, 10);
 
 data{length(data)+1} = ...
@@ -73,6 +75,7 @@ data{length(data)+1} = ...
     'color',[0 0.7 0], 'legend',['$dt=0.01 , N=10$'], 'plot3D',true, 'plot2D',true);
 
 % small time step with large prediction horizon
+disp('Test 3/3: dt=0.01 , N=50 (small time step, long horizon)');
 [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, tau, y0, yg, pos_lim, vel_lim, accel_lim, opt_pos, opt_vel, 0.01, 50);
 
 data{length(data)+1} = ...
