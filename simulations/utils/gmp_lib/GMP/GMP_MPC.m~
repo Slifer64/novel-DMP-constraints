@@ -260,20 +260,20 @@ classdef GMP_MPC < handle
             
             %% check collisions with ellipsoids and calculate plane constraints to avoid them
             Ai = zeros(1, this.n_var);
-            bi = -1e30;
+            bi = -1;
             for k=1:length(this.obstacles)
                 c = this.obstacles{k}.c;
                 inv_Sigma = this.obstacles{k}.inv_Sigma;
                 temp = (p1-c)'*inv_Sigma*(p1-c);
-                if temp < 1.0%1
-                    %% Find the point on the surface ellipsoid
+                if temp < 1.1
+                    %% Find the point on the ellipsoid surface
                     p2 = c + (p1-c) / sqrt(temp);
                     %% Find the norm to the ellipsoid on that point
                     n_e = inv_Sigma*(p2 - c);
                     n_e = n_e / norm(n_e);
                     a_e = phi*n_e';
-                    Ai = [a_e(:)', zeros(1, this.n_slack)];
-                    bi = dot(n_e, p2); %+0.01;
+                    Ai = 0.1*[a_e(:)', zeros(1, this.n_slack)];
+                    bi = 0.1*dot(n_e, p2); %+0.01;
                     
                     this.temp_s = [this.temp_s {struct('n',n_e, 'p1',p1, 'p2',p2, 'c',c)}];
                     break;
@@ -285,16 +285,26 @@ classdef GMP_MPC < handle
         function plot_obstacle_constr(this, si_data)
             
             delete(this.plt_handles);
+
+            this.p_h.XData = [this.p_h.XData this.x0(1)];
+            this.p_h.YData = [this.p_h.YData this.x0(2)];
             
-            if ~isempty(this.P_data)
-                h = plot(this.P_data(1,:), this.P_data(2,:), 'LineWidth',2, 'Color','magenta');
-                this.plt_handles = [this.plt_handles h];
+            this.plt_show_count = this.plt_show_count + 1;
+            if (this.plt_show_count > 19)
+                this.plt_show_count = 0;
+                pause(0.001);
             end
             
+            %s_next = linspace(si_data(1), si_data(end), 30);
+            s_next = si_data;
+            P_next = zeros(this.n_dof, length(s_next));
+            for j=1:length(s_next), P_next(:,j) = this.getYd(s_next(j)); end
+            h = plot(P_next(1,:), P_next(2,:), 'LineWidth',2, 'Color',[1 0.6 1], 'LineStyle','None', 'Marker','*', 'MarkerSize',16);
+            this.plt_handles = [this.plt_handles h];
             s_next = linspace(si_data(1), si_data(end), 30);
             P_next = zeros(this.n_dof, length(s_next));
             for j=1:length(s_next), P_next(:,j) = this.getYd(s_next(j)); end
-            h = plot(P_next(1,:), P_next(2,:), 'LineWidth',2, 'Color',[1 0.7 1]);
+            h = plot(P_next(1,:), P_next(2,:), 'LineWidth',2, 'Color',[1 0.6 1]);
             this.plt_handles = [this.plt_handles h];
             
             for i=1:length(this.temp_s)
@@ -366,7 +376,7 @@ classdef GMP_MPC < handle
             [si_data, si_dot_data] = this.integratePhase(s, s_dot);
             
             A_obst = zeros(this.N_obst, this.n_var);
-            b_obst = -ones(this.N_obst, 1);
+            b_obst = zeros(this.N_obst, 1);
             
             this.temp_s = {};
             this.yd_points = [];
@@ -519,12 +529,12 @@ classdef GMP_MPC < handle
             slack_var = Z(end-this.n_slack+1:end);
             this.W_mpc = reshape(w, N_kernels, this.n_dof)';
             
-            
-%             if ~isempty(this.temp_s)
-                this.plot_obstacle_constr(si_data);
-                pause(0.001);
-                if (s > 0.37), pause(); end
+%             obst_err = A_obst*Z - b_obst;
+%             if (~isempty(find(obst_err < 0)))
+%                 obst_err'
 %             end
+
+            this.plot_obstacle_constr(si_data);
 
             %% =======  Generate optimal output  =======
             
@@ -588,10 +598,12 @@ classdef GMP_MPC < handle
         
         P_data
         ax
+        p_h = plot(nan, nan, 'LineWidth',2, 'Color','magenta') % handle for the path executed so far
         temp_s
         yd_points = []
         y_points = []
         plt_handles = []
+        plt_show_count = 0
        
         settings % struct with settings
         

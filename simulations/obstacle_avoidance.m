@@ -11,7 +11,7 @@ n_dof = size(Pd_data, 1);
 
 ellipsoid = {};
 ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(45, 0.15, 0.08), 'c',[-0.1; 0.3])}];
-% ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(-45, 0.1, 0.06), 'c',[0.18; 0.61])}];
+ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(-45, 0.1, 0.06), 'c',[0.18; 0.61])}];
 ellipsoid_colors = {[1.0, 0.4, 0], [0.4, 0.2, 0]};
 
 for i=1:length(ellipsoid)  
@@ -41,20 +41,20 @@ pos_lim = [
     [ -0.05 , 0.8];
   ];
 
-vel_lim = repmat([ -3.8 , 3.8 ], n_dof, 1);
+vel_lim = repmat([ -0.8 , 0.8 ], n_dof, 1);
 
-accel_lim = repmat([ -10 , 10 ], n_dof, 1);
+accel_lim = repmat([ -2.5 , 2.5 ], n_dof, 1);
 
 % pos_lim = pos_lim + repmat([-1 1], n_dof, 1); % to augment the limits
 
 %% --------- Optimization objective ----------
-opt_pos = 1;
-opt_vel = 0;
+opt_pos = 0;
+opt_vel = 1;
 
 %% -------- Initial/Final states --------
 y0 = Pd_data(:, 1);
 yg = Pd_data(:, end);
-Tf = 6;
+Tf = 5;
 tau = Tf;
 dt = 0.005;
 
@@ -272,8 +272,6 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
         
         % display progress
         if (can_sys.s <= 1), text_prog.update(100*can_sys.s); end
-          
-        gmp_mpc.P_data = P_data;
         
         %% optimization
         if (~opt_fail)
@@ -283,6 +281,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
 
             % check exit status
             if (sol.exit_flag)
+                fprintf('\n');
                 warning(sol.exit_msg);
                 t
                 s = can_sys.s
