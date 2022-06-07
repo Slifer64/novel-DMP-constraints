@@ -263,7 +263,7 @@ classdef GMP_MPC < handle
             bi = -1;
             for k=1:length(this.obstacles)
                 c = this.obstacles{k}.c;
-                inv_Sigma = this.obstacles{k}.inv_Sigma;
+                inv_Sigma = 0.97*this.obstacles{k}.inv_Sigma;
                 temp = (p1-c)'*inv_Sigma*(p1-c);
                 if temp < 1.1
                     %% Find the point on the ellipsoid surface
@@ -286,17 +286,19 @@ classdef GMP_MPC < handle
             
             delete(this.plt_handles);
             
+            %this.ax
+            
             this.p_h.XData = [this.p_h.XData this.x0(1)];
             this.p_h.YData = [this.p_h.YData this.x0(2)];
             
             this.plt_show_count = this.plt_show_count + 1;
-            if (this.plt_show_count < 5), return; end
+            if (this.plt_show_count < 15), return; end
      
             %s_next = linspace(si_data(1), si_data(end), 30);
             s_next = si_data;
             P_next = zeros(this.n_dof, length(s_next));
             for j=1:length(s_next), P_next(:,j) = this.getYd(s_next(j)); end
-            h = plot(P_next(1,:), P_next(2,:), 'LineWidth',2, 'Color',[1 0.6 1], 'LineStyle','None', 'Marker','*', 'MarkerSize',16);
+            h = plot(P_next(1,:), P_next(2,:), 'LineWidth',2, 'Color',[1 0.7 1], 'LineStyle','None', 'Marker','*', 'MarkerSize',16);
             this.plt_handles = [this.plt_handles h];
             s_next = linspace(si_data(1), si_data(end), 30);
             P_next = zeros(this.n_dof, length(s_next));
@@ -337,6 +339,7 @@ classdef GMP_MPC < handle
             drawnow();
             this.plt_show_count = 0;
             pause(0.001);
+            
         end
         
         function solution = solve(this, s, s_dot)
