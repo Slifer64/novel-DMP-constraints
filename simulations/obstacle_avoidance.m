@@ -42,8 +42,8 @@ for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
 
 %% -------- Limits ---------
 pos_lim = [
-    [ -0.4 , 0.4];
-    [ -0.05 , 0.8];
+    [ -0.3 , 0.3];
+    [ -0.03 , 0.77];
   ];
 
 vel_lim = repmat([ -0.8 , 0.8 ], n_dof, 1);
@@ -53,8 +53,8 @@ accel_lim = repmat([ -2.5 , 2.5 ], n_dof, 1);
 % pos_lim = pos_lim + repmat([-1 1], n_dof, 1); % to augment the limits
 
 %% --------- Optimization objective ----------
-opt_pos = 1;
-opt_vel = 0;
+opt_pos = 0;
+opt_vel = 1;
 
 %% -------- Initial/Final states --------
 y0 = Pd_data(:, 1);
@@ -68,20 +68,6 @@ gmp.setGoal(yg);
 
 
 %% =============  Run  ==================
-
-fig = figure;
-fig.Position(3:4) = [1112 844];
-ax = axes();
-hold(ax, 'on');
-plot(Pd_data(1, :), Pd_data(2, :), 'LineWidth',2);
-plot(Pd_data(1, 1), Pd_data(2, 1), 'LineWidth',2, 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14);
-plot(Pd_data(1, end), Pd_data(2, end), 'LineWidth',2, 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14);
-for i=1:length(ellipsoid)
-    plot(E_p{i}(1,:), E_p{i}(2,:), 'LineWidth',2, 'Color',ellipsoid_colors{i});
-    plot(ellipsoid{i}.c(1), ellipsoid{i}.c(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color',ellipsoid_colors{i});
-end
-axis equal
-
 data = {};
 opt_type = 'p';
 if (opt_vel), opt_type = 'v'; end
@@ -95,7 +81,7 @@ data{length(data)+1} = ...
 
     
 %% ---------- GMP-MPC optimization ------------
-[Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, ellipsoid, opt_pos, opt_vel, ax);
+[Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, ellipsoid, opt_pos, opt_vel);
 
 data{length(data)+1} = ...
     struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle','-', ...
@@ -151,7 +137,7 @@ for k=1:length(ind)
     ax.FontSize = ax_fontsize;
     hold off;
 
-    ax = subplot(3,1,2);
+    ax = subplot(3,1,02);
     hold on;
     for k=1:length(data)
         if (~data{k}.plot2D), continue; end
@@ -186,7 +172,7 @@ end
 %% ===================================
 %% ===================================
 
-function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, obstacles, opt_pos, opt_vel, ax)
+function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, obstacles, opt_pos, opt_vel)
       
     gmp = gmp0.deepCopy();
    
@@ -217,9 +203,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
         
     %% --------  GMP - MPC  --------
     gmp_mpc = GMP_MPC(gmp, N_horizon, pred_time_step, N_kernels, kernels_std_scaling, slack_gains);
-    
-    gmp_mpc.ax = ax;
-    
+
     gmp_mpc.settings.max_iter = max_iter;
     gmp_mpc.settings.time_limit = time_limit;
     gmp_mpc.settings.abs_tol = abs_tol;
@@ -244,6 +228,8 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     for i=1:length(obstacles)
        gmp_mpc.addEllipsoidObstacle(obstacles{i}.c, obstacles{i}.Sigma)
     end
+    
+    gmp_mpc.init_plot();
     
     gmp.setScaleMethod(TrajScale_Prop(n_dof));
     gmp.setY0(y0);

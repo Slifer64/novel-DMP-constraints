@@ -305,7 +305,7 @@ classdef GMP_MPC < handle
             plot([this.pos_lb(1), this.pos_lb(1)], [this.pos_lb(2), this.pos_ub(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--');
             plot([this.pos_ub(1), this.pos_ub(1)], [this.pos_lb(2), this.pos_ub(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--');
             % ----- Unconstrained trajectory --------
-            plot(Pd_data(1, :), Pd_data(2, :), 'LineWidth',2, 'Parent',this.ax, 'color','blue')
+            plot(Pd_data(1, :), Pd_data(2, :), 'LineWidth',2, 'Parent',this.ax)
             plot(Pd_data(1, 1), Pd_data(2, 1), 'LineWidth',2, 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14, 'Parent',this.ax)
             plot(Pd_data(1, end), Pd_data(2, end), 'LineWidth',2, 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14, 'Parent',this.ax)
             % ----- Online generated trajectory -----
@@ -322,8 +322,7 @@ classdef GMP_MPC < handle
             end
             axis(this.ax, 'tight');
             axis(this.ax, 'equal');
-            this.ax.XLim = this.ax.XLim + [-0.03, 0.03];
-            this.ax.YLim = this.ax.YLim + [-0.03, 0.03];
+            this.ax.XLim = this.ax.XLim + []
             
         end
         
