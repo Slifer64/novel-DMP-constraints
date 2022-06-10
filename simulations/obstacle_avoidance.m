@@ -1,9 +1,8 @@
 clc;
-close all;
+% close all;
 clear;
 
 % rng(0);
-
 
 load('data/obs_avoid_data', 'sd_data', 'Pd_data')
 
@@ -46,15 +45,15 @@ pos_lim = [
     [ -0.03 , 0.77];
   ];
 
-vel_lim = repmat([ -0.8 , 0.8 ], n_dof, 1);
+vel_lim = repmat([ -0.6 , 0.6 ], n_dof, 1);
 
-accel_lim = repmat([ -2.5 , 2.5 ], n_dof, 1);
+accel_lim = repmat([ -2 , 2 ], n_dof, 1);
 
 % pos_lim = pos_lim + repmat([-1 1], n_dof, 1); % to augment the limits
 
 %% --------- Optimization objective ----------
-opt_pos = 0;
-opt_vel = 1;
+opt_pos = 1;
+opt_vel = 0;
 
 %% -------- Initial/Final states --------
 y0 = Pd_data(:, 1);
@@ -173,7 +172,7 @@ end
 %% ===================================
 
 function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, obstacles, opt_pos, opt_vel)
-      
+    
     gmp = gmp0.deepCopy();
    
     n_dof = length(y0);

@@ -307,10 +307,11 @@ classdef GMP_MPC < handle
             plot(nan, nan, 'LineWidth',2, 'Color',[1 0.7 1], 'LineStyle','-', 'Marker','*', 'MarkerSize',16, 'DisplayName','predicted $\overline{DMP}^*$ traj');
             plot(nan, nan, 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','cyan', 'Parent',this.ax, 'DisplayName','predicted DMP points');
             plot(nan, nan, 'LineWidth',2, 'Marker','o', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax, 'DisplayName','predicted $\overline{DMP}^*$ points');
-            plot(nan, nan, 'LineWidth',2.2, 'LineStyle','-.', 'Color',[0 0.8 0], 'Parent',this.ax, 'DisplayName','obst constr plane');
-            % plot(nan, nan, 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','red', 'Parent',this.ax, 'DisplayName','obst constr trigger');
+            
+            plot(nan, nan, 'LineWidth',2.2, 'LineStyle','-.', 'Color',[0 0.8 0], 'Parent',this.ax, 'DisplayName','obstacle constr plane');
             plot(nan, nan, 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'DisplayName','pos bound constr');
-            legend(this.ax, 'interpreter','latex', 'fontsize',14, 'Position',[0.7446 0.7129 0.2467 0.2573]);
+
+            legend(this.ax, 'interpreter','latex', 'fontsize',14);
             % ----- pos bounds -----
             plot([this.pos_lb(1), this.pos_ub(1)], [this.pos_lb(2), this.pos_lb(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'HandleVisibility','off');
             plot([this.pos_lb(1), this.pos_ub(1)], [this.pos_ub(2), this.pos_ub(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'HandleVisibility','off');
@@ -349,7 +350,7 @@ classdef GMP_MPC < handle
             this.p_h.YData = [this.p_h.YData this.x0(2)];
             
             this.plt_show_count = this.plt_show_count + 1;
-            if (this.plt_show_count < this.plot_every), return; end
+            if (this.plt_show_count < 15), return; end
      
             %s_next = linspace(si_data(1), si_data(end), 30);
             s_next = si_data;
@@ -375,7 +376,7 @@ classdef GMP_MPC < handle
                
                 h1 = quiver(p2(1), p2(2), n_e(1), n_e(2), 0.08, 'Color','green', 'LineWidth',3, 'Parent',this.ax, 'HandleVisibility','off');
                 h2 = plot([p3(1) p4(1)], [p3(2) p4(2)], 'LineWidth',2.2, 'LineStyle','-.', 'Color',[0 0.8 0], 'Parent',this.ax, 'HandleVisibility','off');
-                h3 = plot([c(1) p2(1)], [c(2) p2(2)], 'LineWidth',2, 'LineStyle',':', 'Color','red', 'Parent',this.ax, 'HandleVisibility','off');
+                h3 = plot([c(1) p2(1)], [c(2) p2(2)], 'LineWidth',2, 'LineStyle',':', 'Color','cyan', 'Parent',this.ax, 'HandleVisibility','off');
                 h4 = plot(p1(1), p1(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','red', 'Parent',this.ax, 'HandleVisibility','off');
                 % h5 = plot(p2(1), p2(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax, 'HandleVisibility','off');
                 % axis(this.ax, 'equal');
@@ -396,6 +397,8 @@ classdef GMP_MPC < handle
             drawnow();
             this.plt_show_count = 0;
             pause(0.001);
+            
+            if si_data(1)>0.3, pause(); end
             
         end
         
@@ -660,7 +663,6 @@ classdef GMP_MPC < handle
     properties (Access = public)
         
         plot_on = false
-        plot_every = 5
         P_data
         fig
         ax
