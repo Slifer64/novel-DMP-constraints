@@ -73,8 +73,6 @@ classdef GMP_MPC < handle
             
             this.W_mpc = zeros(this.n_dof, N_kernels);
             
-            this.setObjShiftThres(-1e30);
-            
 %             x_data = linspace(0,1, 300);
 %             Yd_data = zeros(this.n_dof, length(x_data));
 %             for j=1:length(x_data), Yd_data(:,j) = gmp.getYd(x_data(j)); end
@@ -469,8 +467,8 @@ classdef GMP_MPC < handle
                 phi_ddot = this.gmp_mpc.regressVecDDot(si, si_dot, si_ddot);
                 
                 target_dist = norm(yd_i - this.x_f(1:this.n_dof));
-                if (target_dist < this.obj_shift_thres)
-                    lambda = 1 - exp(-this.obj_shift_gain/target_dist);
+                if (target_dist < 0.1)
+                    lambda = 1 - exp(-0.1/(target_dist));
                     this.Qi = blkdiag(lambda*this.I_ndof, (1-lambda)*this.I_ndof);
                 end
                    
@@ -674,7 +672,7 @@ classdef GMP_MPC < handle
     properties (Access = public)
         
         plot_on = false
-        plot_every = 10
+        plot_every = 5
         P_data
         fig
         ax
