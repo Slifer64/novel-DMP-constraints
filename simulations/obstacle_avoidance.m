@@ -25,7 +25,6 @@ for i=1:length(ellipsoid)
     E_p{i} = drawElipsoid2D(ellipsoid{i}.Sigma, ellipsoid{i}.c);
 end
 
-
 addpath('utils/');
 import_gmp_lib();
 import_io_lib();
@@ -59,8 +58,8 @@ accel_lim = repmat([ -2 , 2 ], n_dof, 1);
 % accel_lim = 2*accel_lim;
 
 %% --------- Optimization objective ----------
-opt_pos = 0;
-opt_vel = 1;
+opt_pos = 1;
+opt_vel = 0;
 use_varying_obj = false;
 
 %% -------- Initial/Final states --------
@@ -240,8 +239,6 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
        gmp_mpc.addEllipsoidObstacle(obstacles{i}.c, obstacles{i}.Sigma)
     end
     
-    gmp_mpc.init_plot();
-    
     gmp.setScaleMethod(TrajScale_Prop(n_dof));
     gmp.setY0(y0);
     gmp.setGoal(yg);
@@ -261,7 +258,25 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     pos_slack_data = [];
     vel_slack_data = [];
     accel_slack_data = [];
+    
+%     arma::rowvec s_data = arma::linspace<arma::rowvec>(0, 1, 200);
+%     arma::mat Pd_data(n_dof, s_data.size());
+%     for (int i=0; i<s_data.size(); i++) Pd_data.col(i) = gmp.getYd(s_data(i));
+%     std::vector<arma::mat> obst_curves;
+%     for (auto &e : obstacles) obst_curves.push_back(drawElipsoid2D(e.Sigma, e.c));
 
+    obst_curves = cell(length(obstacles),1);
+    for i=1:length(obstacles)  
+        obst_curves{i} = drawElipsoid2D(obstacles{i}.Sigma, obstacles{i}.c);
+    end
+    sd_data = linspace(0, 1, 200);
+    Pd_data = zeros(n_dof, length(sd_data));
+    for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
+      
+    o_plot = Online2DPlot(gmp_mpc);
+    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), obst_curves, 10);
+
+    gmp_mpc.plot_callback = @(log)o_plot.update_plot(log);
     
     %% -------  Simulation loop  --------
     while (true)

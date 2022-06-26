@@ -285,133 +285,19 @@ classdef GMP_MPC < handle
                     n_e = n_e / norm(n_e);
                     a_e = phi*n_e';
                     Ai = 0.1*[a_e(:)', zeros(1, this.n_slack)];
-                    bi = 0.1*dot(n_e, p2); %+0.01;
+                    bi = 0.1*dot(n_e, p2);
                     
-                    this.temp_s = [this.temp_s {struct('n',n_e, 'p1',p1, 'p2',p2, 'c',c)}];
+                    this.log_.n_e_data = [this.log_.n_e_data {n_e}];
+                    this.log_.p_e_data = [this.log_.p_e_data {p2}];
+                    this.log_.p_data = [this.log_.p_data {p1}];
+                    this.log_.c_data = [this.log_.c_data {c}];
+
                     break;
                 end
             end
             
         end
 
-        function init_plot(this, Pd_data)
-            
-            if (nargin < 2), Pd_data=[]; end
-            
-            if isempty(Pd_data)
-                s_data = linspace(0, 1, 200);
-                Pd_data = zeros(this.n_dof, length(s_data));
-                for j=1:length(s_data), Pd_data(:,j) = this.gmp_ref.getYd(s_data(j)); end
-            end 
-            
-            ellipsoid_colors = {[1.0, 0.4, 0], [0.4, 0.2, 0], [0.4, 0.6, 0], [0.4, 0, 0.8], ...
-                [0.2, 0.6, 0.4], [0.4, 0, 0.2], [0, 0.2, 0.4], [0.6, 0.2, 0.6], [0.4, 0.4, 0.6]};
-            
-            this.plot_on = true;
-            
-            this.fig = figure;
-            this.fig.Position(3:4) = [1112 844];
-            this.ax = axes();
-            hold(this.ax, 'on');
-            % ----- create legend -----
-            plot(nan, nan, 'LineWidth',2, 'LineStyle',':', 'Parent',this.ax, 'color','blue', 'DisplayName','DMP traj');
-            plot(nan, nan, 'LineWidth',2, 'Color','magenta', 'Parent',this.ax, 'DisplayName','$\overline{DMP}^*$ traj');
-            plot(nan, nan, 'LineWidth',2, 'Color',[1 0.7 1], 'LineStyle','-', 'Marker','*', 'MarkerSize',16, 'DisplayName','predicted $\overline{DMP}^*$ traj');
-            plot(nan, nan, 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','cyan', 'Parent',this.ax, 'DisplayName','predicted DMP points');
-            plot(nan, nan, 'LineWidth',2, 'Marker','o', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax, 'DisplayName','predicted $\overline{DMP}^*$ points');
-            plot(nan, nan, 'LineWidth',2.2, 'LineStyle','-.', 'Color',[0 0.8 0], 'Parent',this.ax, 'DisplayName','obst constr plane');
-            % plot(nan, nan, 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','red', 'Parent',this.ax, 'DisplayName','obst constr trigger');
-            plot(nan, nan, 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'DisplayName','pos bound constr');
-            legend(this.ax, 'interpreter','latex', 'fontsize',14, 'Position',[0.7446 0.7129 0.2467 0.2573]);
-            % ----- pos bounds -----
-            plot([this.pos_lb(1), this.pos_ub(1)], [this.pos_lb(2), this.pos_lb(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'HandleVisibility','off');
-            plot([this.pos_lb(1), this.pos_ub(1)], [this.pos_ub(2), this.pos_ub(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'HandleVisibility','off');
-            plot([this.pos_lb(1), this.pos_lb(1)], [this.pos_lb(2), this.pos_ub(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'HandleVisibility','off');
-            plot([this.pos_ub(1), this.pos_ub(1)], [this.pos_lb(2), this.pos_ub(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'HandleVisibility','off');
-            % ----- Unconstrained trajectory --------
-            plot(Pd_data(1, :), Pd_data(2, :), 'LineWidth',2, 'LineStyle',':', 'Parent',this.ax, 'color','blue', 'HandleVisibility','off');
-            plot(Pd_data(1, 1), Pd_data(2, 1), 'LineWidth',2, 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14, 'Parent',this.ax, 'HandleVisibility','off');
-            plot(Pd_data(1, end), Pd_data(2, end), 'LineWidth',2, 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14, 'Parent',this.ax, 'HandleVisibility','off');
-            % ----- Online generated trajectory -----
-            this.p_h = plot(nan, nan, 'LineWidth',2, 'Color','magenta', 'Parent',this.ax, 'HandleVisibility','off');
-            % ----- Obstacles ------
-            for i=1:length(this.obstacles)
-                Sigma = inv(this.obstacles{i}.inv_Sigma);
-                c = this.obstacles{i}.c;
-                theta = linspace(0, 2*pi, 200);
-                Ep = c + chol(Sigma, 'lower')*[cos(theta); sin(theta)];
-                color = ellipsoid_colors{mod(i, length(ellipsoid_colors))};
-                plot(Ep(1,:), Ep(2,:), 'LineWidth',2, 'Color',color, 'Parent',this.ax, 'HandleVisibility','off');
-                plot(c(1), c(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color',color, 'Parent',this.ax, 'HandleVisibility','off');
-            end
-            axis(this.ax, 'tight');
-            axis(this.ax, 'equal');
-            this.ax.XLim = this.ax.XLim + [-0.03, 0.03];
-            this.ax.YLim = this.ax.YLim + [-0.03, 0.03];
-            xlabel('X [m]', 'fontsize',14, 'Parent',this.ax);
-            ylabel('Y [m]', 'fontsize',14, 'Parent',this.ax);
-            
-        end
-        
-        function update_plot(this, si_data)
-            
-            delete(this.plt_handles);
-            
-            this.p_h.XData = [this.p_h.XData this.x0(1)];
-            this.p_h.YData = [this.p_h.YData this.x0(2)];
-            
-            this.plt_show_count = this.plt_show_count + 1;
-            if (this.plt_show_count < this.plot_every), return; end
-     
-            %s_next = linspace(si_data(1), si_data(end), 30);
-            s_next = si_data;
-            P_next = zeros(this.n_dof, length(s_next));
-            for j=1:length(s_next), P_next(:,j) = this.getYd(s_next(j)); end
-            h = plot(P_next(1,:), P_next(2,:), 'LineWidth',2, 'Color',[1 0.7 1], 'LineStyle','None', 'Marker','*', 'MarkerSize',16, 'HandleVisibility','off');
-            this.plt_handles = [this.plt_handles h];
-            s_next = linspace(si_data(1), si_data(end), 30);
-            P_next = zeros(this.n_dof, length(s_next));
-            for j=1:length(s_next), P_next(:,j) = this.getYd(s_next(j)); end
-            h = plot(P_next(1,:), P_next(2,:), 'LineWidth',2, 'Color',[1 0.6 1], 'HandleVisibility','off');
-            this.plt_handles = [this.plt_handles h];
-
-            for i=1:length(this.temp_s)
-                n_e = this.temp_s{i}.n;
-                c = this.temp_s{i}.c;
-                p1 = this.temp_s{i}.p1;
-                p2 = this.temp_s{i}.p2;
-                
-                v = [n_e(2); - n_e(1)]; % tangent line direction
-                p3 = p2 - 0.1*v;
-                p4 = p2 + 0.1*v;
-               
-                h1 = quiver(p2(1), p2(2), n_e(1), n_e(2), 0.08, 'Color','green', 'LineWidth',3, 'Parent',this.ax, 'HandleVisibility','off');
-                h2 = plot([p3(1) p4(1)], [p3(2) p4(2)], 'LineWidth',2.2, 'LineStyle','-.', 'Color',[0 0.8 0], 'Parent',this.ax, 'HandleVisibility','off');
-                h3 = plot([c(1) p2(1)], [c(2) p2(2)], 'LineWidth',2, 'LineStyle',':', 'Color','red', 'Parent',this.ax, 'HandleVisibility','off');
-                h4 = plot(p1(1), p1(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','red', 'Parent',this.ax, 'HandleVisibility','off');
-                % h5 = plot(p2(1), p2(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax, 'HandleVisibility','off');
-                % axis(this.ax, 'equal');
-                
-                this.plt_handles = [this.plt_handles h1 h2 h3 h4];
-            end
-            
-            for j=1:size(this.yd_points, 2)
-                h = plot(this.yd_points(1,j), this.yd_points(2,j), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','cyan', 'Parent',this.ax, 'HandleVisibility','off');
-                this.plt_handles = [this.plt_handles h];
-            end
-            
-            for j=1:size(this.y_points, 2)
-                h = plot(this.y_points(1,j), this.y_points(2,j), 'LineWidth',2, 'Marker','o', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax, 'HandleVisibility','off');
-                this.plt_handles = [this.plt_handles h];
-            end
-            
-            drawnow();
-            this.plt_show_count = 0;
-            pause(0.001);
-%             pause
-            
-        end
-        
         function solution = solve(this, s, s_dot)
                 
             if (isempty(this.can_sys_fun))
@@ -448,10 +334,8 @@ classdef GMP_MPC < handle
             
             A_obst = zeros(this.N_obst, this.n_var);
             b_obst = zeros(this.N_obst, 1);
-            
-            this.temp_s = {};
-            this.yd_points = [];
-            this.y_points = [];
+
+            this.log_.clear();
 
             %% =======  calc cost and inequality constraints along the horizon N  =======
             for i=1:this.N
@@ -486,8 +370,8 @@ classdef GMP_MPC < handle
                 A_obst(i,:) = Ai;
                 b_obst(i) = bi;
                 
-                this.yd_points = [this.yd_points yd_i];
-                this.y_points = [this.y_points y];
+                this.log_.yd_points = [this.log_.yd_points yd_i];
+                this.log_.y_pred_points = [this.log_.y_pred_points y];
 
                 % since the gmp model is valid in [0 1]. Beyond that it
                 % might produce small errors
@@ -510,6 +394,9 @@ classdef GMP_MPC < handle
                 Aineq((i-1)*n_dof3+1 : i*n_dof3, :) = [Aineq_i, this.Aineq_slack];
 
             end
+            
+            this.log_.y_current = this.x0(1:this.n_dof);
+            this.log_.si_data = si_data;
    
             Aineq(this.N*n_dof3+1 : this.N*n_dof3+this.N_obst, :) = A_obst;
             lb(this.N*n_dof3+1 : this.N*n_dof3+this.N_obst) = b_obst;
@@ -611,7 +498,7 @@ classdef GMP_MPC < handle
 %                 obst_err'
 %             end
 
-            if (this.plot_on), this.update_plot(si_data); end
+            if (~isempty(this.plot_callback)), this.plot_callback(this.log_); end
 
             %% =======  Generate optimal output  =======
             
@@ -673,18 +560,9 @@ classdef GMP_MPC < handle
     
     properties (Access = public)
         
-        plot_on = false
-        plot_every = 10
-        P_data
-        fig
-        ax
-        p_h % handle for the path executed so far
-        temp_s
-        yd_points = []
-        y_points = []
-        plt_handles = []
-        plt_show_count = 0
-       
+        log_ = GMP_MPC_log()
+        plot_callback = []
+
         settings % struct with settings
         
 %         A_sp
