@@ -1,5 +1,6 @@
 function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, Tf, y0, yg0, yg, t_g, pos_lim, vel_lim, accel_lim, opt_pos, opt_vel, vp_config)
       
+    global slack_limits
     
     if (isempty(vp_config))
        vp = {};
@@ -32,7 +33,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, Tf, y0, yg0, yg, t_
     final_state_err_tol = [1e-4; 1e-3; 1e-1];
     
     slack_gains = [1e5 100 1];
-    slack_limits = [2e-2, 0.2, 1.0];
+    slack_limits = [2e-2, 0.1, 0.5];
     
 %     max_slack_violation = slack_limits;
 %     pos_lim = pos_lim + repmat(max_slack_violation(1)*[-1 1], n_dof, 1);    

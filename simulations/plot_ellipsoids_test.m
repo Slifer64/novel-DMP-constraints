@@ -6,24 +6,17 @@ clear;
 
 
 %% Define Ellipsoid
-
-% theta = 45 * pi / 180;
-% R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
-% Lambda_2 = diag([1.2, 0.5]);
-% Sigma = R * Lambda_2.^2 * R';
-% c = [0.5; 0.2];
-
-R = eul2rotm([30, 20, 90]);
-Lambda_2 = diag([1, 2, 0.5]);
-Sigma = R * Lambda_2.^2 * R';
-c = [0; 0; 0];
+% Sigma = getEllipseSigma([30, 20, 90], [1, 2, 0.5]);
+% c = [0.1; -0.8; 0.5];
+Sigma = getEllipseSigma([0, 0, 45], [0.19, 0.06, 0.05]);
+c = [-0.14; 0.28; 0.1];
 
 %% Define a point inside the ellipsoid
 % r = 0.2 + 0.6*rand();
 % theta = rand()*2*pi;
 % phi = rand()*pi;
 % p1 = c + chol(Sigma, 'lower')*r*[sin(phi)*cos(theta); sin(phi)*sin(theta); cos(phi)];
-p1 = [-0.0393; 0.1753; -0.3047];
+p1 = [-0.2825; 0.2439; 0.1014];
 
 %% Find the point on the surface ellipsoid
 lambda = 1 / sqrt((p1-c)'/Sigma*(p1-c));
@@ -33,13 +26,11 @@ p_e = c + lambda*(p1-c);
 n = Sigma \ (p_e - c);
 n = n / norm(n);
 
-%% calculate two points on tangent line
-v = [n(2); - n(1); 0]; % tangent line direction
-v = v / norm(v);
-% p3 = p2 - 0.4*v;
-% p4 = p2 + 0.4*v;
+%% calculate tangent plane
+p_e = [-0.2868; 0.2428; 0.1014];
+n = [-0.2800, -0.9447, 0.1705];
 
-[x_plane, y_plane, z_plane] = createPlane(p_e, n, 0.5);
+[x_plane, y_plane, z_plane] = createPlane(p_e, n, 0.05);
 
 
 %% plot
@@ -55,6 +46,7 @@ plot3(c(1), c(2), c(3),  'LineWidth',3, 'Marker','*', 'LineStyle','None', 'Marke
 plot3(p1(1), p1(2), p1(3), 'LineWidth',3, 'Marker','x', 'LineStyle','None', 'Markersize',16, 'Color','red');
 plot3(p_e(1), p_e(2), p_e(3), 'LineWidth',3, 'Marker','x', 'LineStyle','None', 'Markersize',16, 'Color','magenta');
 axis equal
+grid on;
 view(-148.33, 5.3529);
 
 
@@ -74,9 +66,6 @@ function [X, Y, Z] = drawElipsoid(Sigma, c)
     Z = cos(Phi);
     
     P = [X(:)'; Y(:)'; Z(:)'];
-    
-    size(P)
-    size(L)
     P = c + L*P;
     
     X = reshape(P(1,:), length(theta), length(phi));
@@ -99,11 +88,9 @@ function [X, Y, Z] = createPlane(center, normal, scale)
 end
 
 
-function Sigma = getEllipseSigma(angle, lambda_x, lambda_y)
+function Sigma = getEllipseSigma(euler_ang, axes_len)
 
-    theta = angle * pi / 180;
-    R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
-    Lambda_2 = diag([lambda_x, lambda_y]);
-    Sigma = R * Lambda_2.^2 * R';
+    R = eul2rotm(euler_ang);
+    Sigma = R * diag(axes_len).^2 * R';
 
 end

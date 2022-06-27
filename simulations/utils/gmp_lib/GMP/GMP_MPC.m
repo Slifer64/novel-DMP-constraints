@@ -527,11 +527,11 @@ classdef GMP_MPC < handle
             % sometimes it can happen that the slacks are violated...
             % Not sure why this happens...?
             max_violation = max( abs(slack_var) - slack_lim );
-            if ( max_violation > 5e-4 )
-                solution.exit_msg = ['Slack variable limits violated: max violation = ' num2str(max_violation)];
-                solution.exit_flag = -1;
-                return;
-            end
+%             if ( max_violation > 5e-4 )
+%                 solution.exit_msg = ['Slack variable limits violated: max violation = ' num2str(max_violation)];
+%                 solution.exit_flag = -1;
+%                 return;
+%             end
             
             %% =======  update initial state constraints  =======
             this.setInitialState(solution.y, solution.y_dot, solution.y_ddot, s, s_dot, s_ddot);

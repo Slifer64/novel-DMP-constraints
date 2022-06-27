@@ -29,7 +29,7 @@ addpath('utils/');
 import_gmp_lib();
 import_io_lib();
 
-gmp = GMP(2, 30, 1.5);
+gmp = GMP(n_dof, 30, 1.5);
 train_err = gmp.train('LS', sd_data, Pd_data)
 for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
 
@@ -199,7 +199,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     
     final_state_err_tol = 1e-1*[1e-3; 1e-2; 1e-1];
     
-    slack_gains = [1e5 100 1];
+    slack_gains = 1e-5*[1e5 100 1];
     slack_limits = [2e-2, 0.2, 1.0];
     
     time_limit = 0; %2e-3;
@@ -258,12 +258,6 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     pos_slack_data = [];
     vel_slack_data = [];
     accel_slack_data = [];
-    
-%     arma::rowvec s_data = arma::linspace<arma::rowvec>(0, 1, 200);
-%     arma::mat Pd_data(n_dof, s_data.size());
-%     for (int i=0; i<s_data.size(); i++) Pd_data.col(i) = gmp.getYd(s_data(i));
-%     std::vector<arma::mat> obst_curves;
-%     for (auto &e : obstacles) obst_curves.push_back(drawElipsoid2D(e.Sigma, e.c));
 
     obst_curves = cell(length(obstacles),1);
     for i=1:length(obstacles)  

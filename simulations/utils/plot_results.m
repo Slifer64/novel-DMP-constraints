@@ -15,6 +15,12 @@ for i=1:length(via_points)
     vp_mat = [vp_mat via_points{i}.pos]; 
 end
 
+global slack_limits
+
+p_slack = slack_limits(1);
+v_slack = slack_limits(2);
+a_slack = slack_limits(3);
+
 %% --------- plot 3D paths ----------
 if (n_dof == 3)
     fig = figure;
@@ -111,9 +117,13 @@ for i=1:n_dof
     if (~isempty(via_points))
         plot(t_vp, vp_mat(i,:), 'LineWidth', 3, 'LineStyle','none', 'Color','red','Marker','*', 'MarkerSize',10, 'HandleVisibility','off');
     end
-    % plot bounds
+    % plot soft limits
     plot(ax.XLim, [pos_lim(i,1) pos_lim(i,1)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
     plot(ax.XLim, [pos_lim(i,2) pos_lim(i,2)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
+    % plot hard limits
+    plot(ax.XLim, [pos_lim(i,1) pos_lim(i,1)]-p_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+    plot(ax.XLim, [pos_lim(i,2) pos_lim(i,2)]+p_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+    
     ax.FontSize = ax_fontsize;
     % labels, title ...
     ylabel('pos [$m$]', 'interpreter','latex', 'fontsize',label_font);
@@ -132,9 +142,13 @@ for i=1:n_dof
         plot(data{k}.Time, data{k}.Vel(i,:), 'LineWidth',2.5, 'LineStyle',data{k}.linestyle, 'Color',data{k}.color);
     end
     axis tight;
-    % plot bounds
+    % plot soft limits
     plot(ax.XLim, [vel_lim(i,1) vel_lim(i,1)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
     plot(ax.XLim, [vel_lim(i,2) vel_lim(i,2)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
+    % plot hard limits
+    plot(ax.XLim, [vel_lim(i,1) vel_lim(i,1)]-v_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+    plot(ax.XLim, [vel_lim(i,2) vel_lim(i,2)]+v_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+
     ylabel('vel [$m/s$]', 'interpreter','latex', 'fontsize',label_font);
     ax.FontSize = ax_fontsize;
     hold off;
@@ -150,9 +164,12 @@ for i=1:n_dof
         plot(data{k}.Time, data{k}.Accel(i,:), 'LineWidth',2.5, 'LineStyle',data{k}.linestyle, 'Color',data{k}.color);
     end
     axis tight;
-    % plot bounds
+    % plot soft limits
     plot(ax.XLim, [accel_lim(i,1) accel_lim(i,1)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
     plot(ax.XLim, [accel_lim(i,2) accel_lim(i,2)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
+    % plot hard limits
+    plot(ax.XLim, [accel_lim(i,1) accel_lim(i,1)]-a_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+    plot(ax.XLim, [accel_lim(i,2) accel_lim(i,2)]+a_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
     %ax.YLim = [ max(ax.YLim(1), 8*accel_lim(i,1)) min(ax.YLim(2), 8*accel_lim(i,2)) ];
     ylabel('accel [$m/s^2$]', 'interpreter','latex', 'fontsize',label_font);
     xlabel('time [$s$]', 'interpreter','latex', 'fontsize',label_font);
