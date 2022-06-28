@@ -93,12 +93,21 @@ end
 
 %% ---------- Online GMP-trajectory optimization ------------
 if (traj_mpc)
-    [Time, P_data, dP_data, ddP_data] = mpcTrajOpt(gmp, tau, 0.01, y0, yg, pos_lim, vel_lim, accel_lim, opt_pos, opt_vel, qp_solver_type);
+    global slack_limits
+    p_slack = slack_limits(1) * [-1, 1];
+    v_slack = slack_limits(2) * [-1, 1];
+    a_slack = slack_limits(3) * [-1, 1];
+    
+    p_lim = pos_lim+p_slack;
+    v_lim = vel_lim+v_slack;
+    a_lim = accel_lim+a_slack;
+    
+    [Time, P_data, dP_data, ddP_data] = mpcTrajOpt(gmp, tau, 0.01, y0, yg, p_lim, v_lim, a_lim, opt_pos, opt_vel, qp_solver_type);
     data{length(data)+1} = ...
         struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle','-', ...
         'color',[0 0.7 0], 'legend',['$' 'DMP-MPC, \delta t:10 ms' '$'], 'plot3D',true, 'plot2D',true);
     
-    [Time, P_data, dP_data, ddP_data] = mpcTrajOpt(gmp, tau, 0.1, y0, yg, pos_lim, vel_lim, accel_lim, opt_pos, opt_vel, qp_solver_type);
+    [Time, P_data, dP_data, ddP_data] = mpcTrajOpt(gmp, tau, 0.1, y0, yg, p_lim, v_lim, a_lim, opt_pos, opt_vel, qp_solver_type);
     data{length(data)+1} = ...
         struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle',':', ...
         'color',[0.85 0.33 0.1], 'legend',['$' 'DMP-MPC, \delta t:100 ms' '$'], 'plot3D',true, 'plot2D',true);

@@ -45,7 +45,7 @@ if (n_dof == 3)
 %     x_lim = ax.XLim + 0.05*[-1 1];
 %     y_lim = ax.YLim + 0.05*[-1 1];
 %     z_lim = ax.ZLim + 0.05*[-1 1];
-    plot3Dbounds(ax, pos_lim, select_bounds_to_plot);
+    plot3Dbounds(ax, pos_lim + p_slack*[-1 1], select_bounds_to_plot);
     if (~isempty(view_)), view(view_); 
     else, view(-164, 19.4);
     end
