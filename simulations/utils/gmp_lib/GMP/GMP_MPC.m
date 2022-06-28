@@ -100,11 +100,9 @@ classdef GMP_MPC < handle
             
         end
         
-        function setObjShiftThres(this, dist_thres, gain)
+        function setObjShiftThres(this, dist_thres)
             
-            if (nargin < 3), gain = dist_thres; end
             this.obj_shift_thres = dist_thres;
-            this.obj_shift_gain = gain;
             
         end
         
@@ -354,7 +352,8 @@ classdef GMP_MPC < handle
                 
                 target_dist = norm(yd_i - this.x_f(1:this.n_dof));
                 if (target_dist < this.obj_shift_thres)
-                    lambda = 1 - exp(-this.obj_shift_gain/target_dist);
+                    %lambda = 1 - exp(-0.5*this.obj_shift_gain/target_dist);
+                    lambda = 1 - (target_dist/this.obj_shift_thres);
                     this.Qi = blkdiag(lambda*this.I_ndof, (1-lambda)*this.I_ndof);
                 end
                    
@@ -581,7 +580,6 @@ classdef GMP_MPC < handle
     properties (Access = protected)
         
         obj_shift_thres
-        obj_shift_gain
             
         pos_gain
         vel_gain

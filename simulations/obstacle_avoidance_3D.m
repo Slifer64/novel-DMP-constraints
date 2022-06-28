@@ -42,9 +42,9 @@ accel_lim = repmat([ -2 , 2 ], n_dof, 1);
 % accel_lim = 2*accel_lim;
 
 %% --------- Optimization objective ----------
-opt_pos = 1;
-opt_vel = 0;
-use_varying_obj = false;
+opt_pos = 0;
+opt_vel = 1;
+use_varying_obj = true;
 
 %% -------- Initial/Final states --------
 y0 = Pd_data(:, 1);
@@ -79,16 +79,16 @@ data{length(data)+1} = ...
 
 
 %% --------- Plot results ------------
-% figure; hold on;
-% plot3(Pd_data(1, :), Pd_data(2, :), Pd_data(3, :),'LineWidth',2);
-% plot3(Pd_data(1, 1), Pd_data(2, 1), Pd_data(3, 1),'LineWidth',2, 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14);
-% plot3(Pd_data(1, end), Pd_data(2, end), Pd_data(3, end),'LineWidth',2, 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14);
-% plot3(P_data(1, :), P_data(2, :), P_data(3, :),'LineWidth',2, 'Color','magenta');
-% for i=1:length(ellipsoid)
-%     surf(E_p{i}{1}, E_p{i}{2}, E_p{i}{3}, 'FaceColor',ellipsoid_colors{i}, 'FaceAlpha',0.5 , 'LineStyle','None');
-%     plot3(ellipsoid{i}.c(1), ellipsoid{i}.c(2), ellipsoid{i}.c(3), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color',ellipsoid_colors{i});
-% end
-% axis equal
+figure; hold on;
+plot3(Pd_data(1, :), Pd_data(2, :), Pd_data(3, :),'LineWidth',2);
+plot3(Pd_data(1, 1), Pd_data(2, 1), Pd_data(3, 1),'LineWidth',2, 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14);
+plot3(Pd_data(1, end), Pd_data(2, end), Pd_data(3, end),'LineWidth',2, 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14);
+plot3(P_data(1, :), P_data(2, :), P_data(3, :),'LineWidth',2, 'Color','magenta');
+for i=1:length(ellipsoid)
+    surf(E_p{i}{1}, E_p{i}{2}, E_p{i}{3}, 'FaceColor',ellipsoid_colors{i}, 'FaceAlpha',0.5 , 'LineStyle','None');
+    plot3(ellipsoid{i}.c(1), ellipsoid{i}.c(2), ellipsoid{i}.c(3), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color',ellipsoid_colors{i});
+end
+axis equal
 
 
 title_ = {'x coordinate', 'y coordinate', 'z coordinate'};
@@ -218,8 +218,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     
     gmp_mpc.setObjCostGains(opt_pos, opt_vel);
     if (opt_vel && use_varying_obj)
-        dist_thres = 0.15; %0.1 * norm(yg-y0);
-        gmp_mpc.setObjShiftThres(dist_thres, dist_thres);
+        gmp_mpc.setObjShiftThres(0.15);
     end
     
     gmp_mpc.setPosLimits(pos_lim(:,1), pos_lim(:,2));
@@ -269,7 +268,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
       
     o_plot = Online3DPlot(gmp_mpc);
-    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), obst_curves, 10);
+    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), obst_curves, 25);
 
     gmp_mpc.plot_callback = @(log)o_plot.update_plot(log);
     

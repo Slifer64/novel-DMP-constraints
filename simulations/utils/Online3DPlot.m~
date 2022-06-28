@@ -49,8 +49,8 @@ classdef Online3DPlot < handle
 %             plot3([pos_ub(1), pos_ub(1)], [pos_lb(2), pos_ub(2)], 'LineWidth',2, 'Color',[1 0.5 0.5], 'LineStyle','--', 'HandleVisibility','off');
             % ----- Unconstrained trajectory --------
             plot3(Pd_data(1, :), Pd_data(2, :), Pd_data(3, :), this.dmp_traj_properties{:}, 'HandleVisibility','off');
-            plot3(Pd_data(1, 1), Pd_data(2, 1), Pd_data(3, 1),'LineWidth',2, 'LineStyle','None', 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14, 'Parent',this.ax, 'HandleVisibility','off');
-            plot3(Pd_data(1, end), Pd_data(2, end), Pd_data(3, end), 'LineWidth',2, 'LineStyle','None', 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14, 'Parent',this.ax, 'HandleVisibility','off');
+            plot3(Pd_data(1, 1), Pd_data(2, 1), Pd_data(3, 1),'LineWidth',2, 'Marker','o', 'Color',[0 0.8 0], 'MarkerSize',14, 'Parent',this.ax, 'HandleVisibility','off');
+            plot3(Pd_data(1, end), Pd_data(2, end), Pd_data(3, end), 'LineWidth',2, 'Marker','x', 'Color',[0.8 0 0], 'MarkerSize',14, 'Parent',this.ax, 'HandleVisibility','off');
             % ----- Online generated trajectory -----
             this.p_h = plot3(nan, nan, nan, this.opt_traj_properties{:}, 'HandleVisibility','off');
             % ----- Obstacles ------
@@ -86,6 +86,12 @@ classdef Online3DPlot < handle
             
             n_dof = length(log_.y_current);
             
+        dmp_traj_properties
+        opt_traj_properties
+        yd_properties
+        y_pred_properties
+        obst_properties
+
             %s_next = linspace(log_.si_data(1), log_.si_data(end), 30);
             s_next = log_.si_data;
             P_next = zeros(n_dof, length(s_next));
@@ -107,7 +113,7 @@ classdef Online3DPlot < handle
                 constr_plane = Online3DPlot.createPlane(p_e, n_e, 0.1);
 
                 h1 = quiver3(p_e(1), p_e(2), p_e(3), n_e(1), n_e(2), n_e(3), 0.08, 'Color','green', 'LineWidth',3, 'Parent',this.ax, 'HandleVisibility','off');
-                h2 = patch('XData',constr_plane{1}, 'YData',constr_plane{2}, 'ZData',constr_plane{3}, this.obst_properties{:}, 'HandleVisibility','off');
+                h2 = patch('XData',constr_plane{1}, 'YData',constr_plane{2}, 'ZData',constr_plane{3}, 'LineStyle','None', 'FaceColor',[0 0.8 0], 'FaceAlpha',0.4, 'Parent',this.ax, 'HandleVisibility','off');
                 h3 = plot3([c(1) p_e(1)], [c(2) p_e(2)], [c(3) p_e(3)], 'LineWidth',2, 'LineStyle',':', 'Color','red', 'Parent',this.ax, 'HandleVisibility','off');
                 h4 = plot3(p1(1), p1(2), p1(3), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','red', 'Parent',this.ax, 'HandleVisibility','off');
                 % h5 = plot3(p2(1), p2(2), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax, 'HandleVisibility','off');
@@ -115,12 +121,16 @@ classdef Online3DPlot < handle
 
                 this.plt_handles = [this.plt_handles h1 h2 h3 h4];
             end
-        
-            h = plot3(log_.yd_points(1,:), log_.yd_points(2,:), log_.yd_points(3,:), this.yd_properties{:}, 'HandleVisibility','off');
-            this.plt_handles = [this.plt_handles h];
-            
-            h = plot3(log_.y_pred_points(1,:), log_.y_pred_points(2,:), log_.y_pred_points(3,:), this.y_pred_properties{:}, 'HandleVisibility','off');
-            this.plt_handles = [this.plt_handles h];
+
+            for j=1:size(log_.yd_points, 2)
+                h = plot3(log_.yd_points(1,j), log_.yd_points(2,j), log_.yd_points(3,j), 'LineWidth',2, 'Marker','x', 'LineStyle','None', 'Markersize',14, 'Color','cyan', 'Parent',this.ax, 'HandleVisibility','off');
+                this.plt_handles = [this.plt_handles h];
+            end
+
+            for j=1:size(log_.y_pred_points, 2)
+                h = plot3(log_.y_pred_points(1,j), log_.y_pred_points(2,j), log_.y_pred_points(3,j), 'LineWidth',2, 'Marker','o', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax, 'HandleVisibility','off');
+                this.plt_handles = [this.plt_handles h];
+            end
 
             drawnow();
             this.plt_show_count = 0;
