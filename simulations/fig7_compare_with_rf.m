@@ -33,7 +33,7 @@ opt_vel = (1 - opt_pos);
 
 ygd = [0.26, -0.12, 0.32]';   % demo target
 yg = [ 0.5, 0.0817, 0.46 ]'; % execution target
-tau = 3.2; % execution time duration
+tau = 3.4; % execution time duration
 
 %% to change online the target pose at t = t_g from 'yg0' to 'yg'
 t_g = inf; %0.5*tau;

@@ -42,8 +42,8 @@ accel_lim = repmat([ -2 , 2 ], n_dof, 1);
 % accel_lim = 2*accel_lim;
 
 %% --------- Optimization objective ----------
-opt_pos = 0;
-opt_vel = 1;
+opt_pos = 1;
+opt_vel = 0;
 use_varying_obj = true;
 
 %% -------- Initial/Final states --------
@@ -268,7 +268,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
       
     o_plot = Online3DPlot(gmp_mpc);
-    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), obst_curves, 25);
+    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), obst_curves, 4);
 
     gmp_mpc.plot_callback = @(log)o_plot.update_plot(log);
     
