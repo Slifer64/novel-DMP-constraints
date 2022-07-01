@@ -42,8 +42,8 @@ accel_lim = repmat([ -2 , 2 ], n_dof, 1);
 % accel_lim = 2*accel_lim;
 
 %% --------- Optimization objective ----------
-opt_pos = 1;
-opt_vel = 0;
+opt_pos = 0;
+opt_vel = 1;
 use_varying_obj = true;
 
 %% -------- Initial/Final states --------
@@ -77,6 +77,8 @@ data{length(data)+1} = ...
     struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle','-', ...
     'color',[0.72 0.27 1], 'legend','$\overline{DMP}^*$', 'plot3D',true, 'plot2D',true);
 
+
+return
 
 %% --------- Plot results ------------
 figure; hold on;
@@ -263,14 +265,18 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     for i=1:length(obstacles)  
         obst_curves{i} = drawElipsoid(obstacles{i}.Sigma, obstacles{i}.c);
     end
-    sd_data = linspace(0, 1, 200);
-    Pd_data = zeros(n_dof, length(sd_data));
-    for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
+
+    [Timed, Pd_data, dPd_data, ddPd_data] = getGMPTrajectory(gmp, Tf, y0, yg);
       
-    o_plot = OnlinePlot(n_dof, gmp_mpc);
-    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), slack_limits(1), obst_curves, 4);
+    path_plot = OnlinePlot(n_dof, gmp_mpc);
+    path_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), slack_limits(1), obst_curves, 4);
+    
+    traj_plot = OnlineTrajPlot(pos_lim, vel_lim, accel_lim, slack_limits, Timed, Pd_data, dPd_data, ddPd_data);
 
     % gmp_mpc.plot_callback = @(log)o_plot.update_plot(log);
+    
+    fprintf('\nProgram paused. Press [enter] to continue...\n');
+    pause
     
     %% -------  Simulation loop  --------
     while (true)
@@ -290,7 +296,8 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
             % sovle
             sol = gmp_mpc.solve(can_sys.s, can_sys.s_dot);
             
-            o_plot.update_plot(gmp_mpc.log_);
+            path_plot.update(gmp_mpc.log_);
+            traj_plot.update(t, sol.y, sol.y_dot, sol.y_ddot);
 
             % check exit status
             if (sol.exit_flag)

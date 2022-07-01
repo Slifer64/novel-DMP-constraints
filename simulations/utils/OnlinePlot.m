@@ -42,8 +42,8 @@ classdef OnlinePlot < handle
             this.ax = axes();
             hold(this.ax, 'on');
             % ----- create legend -----
-            this.dmp_traj_properties = {'LineWidth',2, 'LineStyle',':', 'Parent',this.ax, 'color','blue'};
-            this.opt_traj_properties = {'LineWidth',2, 'Color','magenta', 'Parent',this.ax};
+            this.dmp_traj_properties = {'LineWidth',2.5, 'LineStyle',':', 'Parent',this.ax, 'color','blue'};
+            this.opt_traj_properties = {'LineWidth',2.5, 'Color','magenta', 'Parent',this.ax};
             this.pred_traj_properties = {'LineWidth',2, 'Color',[1 0.7 1], 'LineStyle','-'};
             this.yd_properties = {'LineWidth',2, 'Marker','*', 'LineStyle','None', 'Markersize',14, 'Color','cyan', 'Parent',this.ax};
             this.y_pred_properties = {'LineWidth',2, 'Marker','o', 'LineStyle','None', 'Markersize',14, 'Color','magenta', 'Parent',this.ax};
@@ -116,7 +116,7 @@ classdef OnlinePlot < handle
 
         end
 
-        function update_plot(this, log_)
+        function update(this, log_)
 
             this.p_h.XData = [this.p_h.XData log_.y_current(1)];
             this.p_h.YData = [this.p_h.YData log_.y_current(2)];
