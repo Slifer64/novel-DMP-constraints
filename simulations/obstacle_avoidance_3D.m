@@ -267,10 +267,10 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     Pd_data = zeros(n_dof, length(sd_data));
     for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
       
-    o_plot = Online3DPlot(gmp_mpc);
-    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), obst_curves, 4);
+    o_plot = OnlinePlot(n_dof, gmp_mpc);
+    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), slack_limits(1), obst_curves, 4);
 
-    gmp_mpc.plot_callback = @(log)o_plot.update_plot(log);
+    % gmp_mpc.plot_callback = @(log)o_plot.update_plot(log);
     
     %% -------  Simulation loop  --------
     while (true)
@@ -289,6 +289,8 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
             
             % sovle
             sol = gmp_mpc.solve(can_sys.s, can_sys.s_dot);
+            
+            o_plot.update_plot(gmp_mpc.log_);
 
             % check exit status
             if (sol.exit_flag)

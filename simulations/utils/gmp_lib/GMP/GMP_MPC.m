@@ -350,7 +350,8 @@ classdef GMP_MPC < handle
                 phi_dot = this.gmp_mpc.regressVecDot(si, si_dot);
                 phi_ddot = this.gmp_mpc.regressVecDDot(si, si_dot, si_ddot);
                 
-                target_dist = norm(yd_i - this.x_f(1:this.n_dof));
+                yg = this.x_f(1:this.n_dof);
+                target_dist = min([norm(this.getYd(si) - yg), norm(yd_i - yg)]);
                 if (target_dist < this.obj_shift_thres)
                     %lambda = 1 - exp(-0.5*this.obj_shift_gain/target_dist);
                     lambda = 1 - (target_dist/this.obj_shift_thres);
@@ -395,6 +396,8 @@ classdef GMP_MPC < handle
             end
             
             this.log_.y_current = this.x0(1:this.n_dof);
+            this.log_.dy_current = this.x0(this.n_dof+1:2*this.n_dof);
+            this.log_.ddy_current = this.x0(2*this.n_dof+1:end);
             this.log_.si_data = si_data;
    
             Aineq(this.N*n_dof3+1 : this.N*n_dof3+this.N_obst, :) = A_obst;

@@ -17,8 +17,9 @@ ellipsoid = {};
 % ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(0, 0.22, 0.06), 'c',[-0.14; 0.21])}];
 % ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(78, 0.18, 0.06), 'c',[-0.14; 0.26])}];
 % ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(45, 0.19, 0.06), 'c',[-0.18; 0.28])}];
-ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(45, 0.19, 0.06), 'c',[-0.14; 0.28])}];
-ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(-40, 0.13, 0.07), 'c',[0.16; 0.61])}];
+ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(90, 0.19, 0.06), 'c',[-0.14; 0.28])}];
+ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(10, 0.08, 0.05), 'c',[-0.05; 0.75])}];
+ellipsoid = [ellipsoid {struct('Sigma',getEllipseSigma(-40, 0.13, 0.07), 'c',[0.17; 0.52])}];
 ellipsoid_colors = {[1.0, 0.4, 0], [0.4, 0.2, 0], [0.2 0.75 0.2]};
 
 for i=1:length(ellipsoid)  
@@ -58,14 +59,13 @@ accel_lim = repmat([ -2 , 2 ], n_dof, 1);
 % accel_lim = 2*accel_lim;
 
 %% --------- Optimization objective ----------
-opt_pos = 1;
-opt_vel = 0;
-use_varying_obj = false;
+opt_pos = 0;
+opt_vel = 1;
 
 %% -------- Initial/Final states --------
 y0 = Pd_data(:, 1);
 yg = Pd_data(:, end);
-Tf = 5;
+Tf = 8;
 tau = Tf;
 dt = 0.005;
 
@@ -87,7 +87,7 @@ data{length(data)+1} = ...
 
     
 %% ---------- GMP-MPC optimization ------------
-[Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, ellipsoid, opt_pos, opt_vel, use_varying_obj);
+[Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, ellipsoid, opt_pos, opt_vel);
 
 data{length(data)+1} = ...
     struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle','-', ...
@@ -178,13 +178,15 @@ end
 %% ===================================
 %% ===================================
 
-function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, obstacles, opt_pos, opt_vel, use_varying_obj)
+function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, obstacles, opt_pos, opt_vel)
     
     gmp = gmp0.deepCopy();
    
     n_dof = length(y0);
 
     O_ndof = zeros(n_dof,1);
+    
+    use_varying_obj = true;
 
     t = 0;
     can_sys = CanonicalSystem(Tf, 30);
@@ -209,6 +211,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
         
     %% --------  GMP - MPC  --------
     gmp_mpc = GMP_MPC(gmp, N_horizon, pred_time_step, N_kernels, kernels_std_scaling, slack_gains);
+    
 
     gmp_mpc.settings.max_iter = max_iter;
     gmp_mpc.settings.time_limit = time_limit;
@@ -216,10 +219,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     gmp_mpc.settings.rel_tol = rel_tol;
     
     gmp_mpc.setObjCostGains(opt_pos, opt_vel);
-    if (opt_vel && use_varying_obj)
-        dist_thres = 0.15; %0.1 * norm(yg-y0);
-        gmp_mpc.setObjShiftThres(dist_thres, dist_thres);
-    end
+    if (opt_vel && use_varying_obj), gmp_mpc.setObjShiftThres(0.15); end
     
     gmp_mpc.setPosLimits(pos_lim(:,1), pos_lim(:,2));
     gmp_mpc.setVelLimits(vel_lim(:,1), vel_lim(:,2));
@@ -261,14 +261,15 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
 
     obst_curves = cell(length(obstacles),1);
     for i=1:length(obstacles)  
-        obst_curves{i} = drawElipsoid2D(obstacles{i}.Sigma, obstacles{i}.c);
+        points = drawElipsoid2D(obstacles{i}.Sigma, obstacles{i}.c);
+    	obst_curves{i} = {points(1,:), points(2,:)};
     end
     sd_data = linspace(0, 1, 200);
     Pd_data = zeros(n_dof, length(sd_data));
     for j=1:length(sd_data), Pd_data(:,j) = gmp.getYd(sd_data(j)); end
       
-    o_plot = Online2DPlot(gmp_mpc);
-    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), obst_curves, 10);
+    o_plot = OnlinePlot(n_dof, gmp_mpc);
+    o_plot.init(Pd_data, pos_lim(:,1), pos_lim(:,2), slack_limits(1), obst_curves, 10);
 
     gmp_mpc.plot_callback = @(log)o_plot.update_plot(log);
     

@@ -34,6 +34,8 @@ classdef GMP_MPC_log < handle
         yd_points
         y_pred_points
         y_current
+        dy_current
+        ddy_current
         c_data
         
     end
