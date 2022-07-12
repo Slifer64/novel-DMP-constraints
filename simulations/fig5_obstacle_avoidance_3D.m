@@ -42,9 +42,8 @@ accel_lim = repmat([ -2 , 2 ], n_dof, 1);
 % accel_lim = 2*accel_lim;
 
 %% --------- Optimization objective ----------
-opt_pos = 0;
-opt_vel = 1;
-use_varying_obj = true;
+opt_pos = 1;
+opt_vel = 1 - opt_pos;
 
 %% -------- Initial/Final states --------
 y0 = Pd_data(:, 1);
@@ -71,7 +70,7 @@ data{length(data)+1} = ...
 
     
 %% ---------- GMP-MPC optimization ------------
-[Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, ellipsoid, opt_pos, opt_vel, use_varying_obj);
+[Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, ellipsoid, opt_pos, opt_vel);
 
 data{length(data)+1} = ...
     struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle','-', ...
@@ -179,7 +178,7 @@ end
 %% ===================================
 %% ===================================
 
-function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, obstacles, opt_pos, opt_vel, use_varying_obj)
+function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos_lim, vel_lim, accel_lim, obstacles, opt_pos, opt_vel)
     
     global slack_limits
 
@@ -219,9 +218,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     gmp_mpc.settings.rel_tol = rel_tol;
     
     gmp_mpc.setObjCostGains(opt_pos, opt_vel);
-    if (opt_vel && use_varying_obj)
-        gmp_mpc.setObjShiftThres(0.15);
-    end
+    if (opt_vel), gmp_mpc.setObjShiftThres(0.15); end
     
     gmp_mpc.setPosLimits(pos_lim(:,1), pos_lim(:,2));
     gmp_mpc.setVelLimits(vel_lim(:,1), vel_lim(:,2));

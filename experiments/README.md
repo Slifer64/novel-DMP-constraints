@@ -9,7 +9,7 @@ The `gmp_lib` is documented to some extent and further documentation will be add
 
 ---
 ## Handover
-The function that executes the handover is `void HandoverExperiment::execute()` in the file `handover/handover_experiment.cpp`. 
+The core function that executes the handover is `void HandoverExperiment::execute()` in the file `handover/handover_experiment.cpp`. 
 The  parameters for the proposed on-line optimization are defined in `handover/handover_params.yaml`
 We use the pretrained DMP model `handover/handover_gmp_model.bin`
 
@@ -17,6 +17,13 @@ We use the pretrained DMP model `handover/handover_gmp_model.bin`
 ---
 
 ## Placing of cube inside bin
-The function that placing is `void ViapointsExperiment::execute()` in the file `place_cube_in_bin/viapoints_experiment.cpp`. 
+The core function that executes the placing is `void ViapointsExperiment::execute()` in the file `place_cube_in_bin/viapoints_experiment.cpp`. 
 The  parameters for the proposed on-line optimization are defined in `place_cube_in_bin/viapoints_params.yaml`
 We use the pretrained DMP model `place_cube_in_bin/viapoints_gmp_model.bin`
+
+---
+
+## Obstacle avoidance
+The core function that executes the obstacle avoidance is `void ObstaclesExperiment::execute()` in the file `obstacle_avoidance/obstacles_experiment.cpp`. 
+The  parameters for the proposed on-line optimization are defined in `obstacle_avoidance/obstacles_params.yaml`
+We use the pretrained DMP model `obstacle_avoidance/obstacles_gmp_model.bin`

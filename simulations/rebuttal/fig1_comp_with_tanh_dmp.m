@@ -2,12 +2,12 @@ clc;
 close all;
 clear;
 
-addpath('utils/');
+addpath('../utils/');
 import_gmp_lib();
 import_io_lib();
 
 %% Load training data
-fid = FileIO('data/pos_data.bin', FileIO.in);
+fid = FileIO('../data/pos_data.bin', FileIO.in);
 Timed = fid.read('Timed');
 Pd_data = fid.read('Pd_data');
 dPd_data = fid.read('dPd_data');

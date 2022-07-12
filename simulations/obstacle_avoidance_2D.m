@@ -186,8 +186,6 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     n_dof = length(y0);
 
     O_ndof = zeros(n_dof,1);
-    
-    use_varying_obj = true;
 
     t = 0;
     can_sys = CanonicalSystem(Tf, 30);
@@ -220,7 +218,7 @@ function [Time, P_data, dP_data, ddP_data] = gmpMpcOpt(gmp0, dt, Tf, y0, yg, pos
     gmp_mpc.settings.rel_tol = rel_tol;
     
     gmp_mpc.setObjCostGains(opt_pos, opt_vel);
-    if (opt_vel && use_varying_obj), gmp_mpc.setObjShiftThres(0.15); end
+    if (opt_vel), gmp_mpc.setObjShiftThres(0.15); end
     
     gmp_mpc.setPosLimits(pos_lim(:,1), pos_lim(:,2));
     gmp_mpc.setVelLimits(vel_lim(:,1), vel_lim(:,2));

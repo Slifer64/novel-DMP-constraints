@@ -5,6 +5,7 @@
 //
 
 #include <gmp_lib/GMP/GMP.h>
+#include <gmp_lib/utils.h>
 
 namespace as64_
 {
@@ -24,11 +25,21 @@ public:
    */
   GMP_Update(gmp_::GMP *gmp);
 
+  void syncUpdate(bool set);
+
+  void recursiveUpdate(bool set);
+
+  void updateNow();
+
   void initSigmaw();
 
-  void initSigmaWfromMsr(const arma::rowvec &x_data);
+  void initSigmaWfromPosMsr(const arma::rowvec &x_data);
 
-  void enableSigmawUpdate(bool flag);
+  void initSigmaWfromVelMsr(const arma::rowvec &x_data, double Tf);
+
+  void initSigmaWfromAccelMsr(const arma::rowvec &x_data, double Tf);
+
+  void initExpSigmaw(double decay_rate=0.01);
 
   void setSigmaW(const arma::mat &Sw);
 
@@ -61,7 +72,16 @@ protected:
 
   arma::mat Sigma_w; ///< weights covariance for trajectory update
   double rv; ///< noise variance for trajectory update
-  bool enable_Sigma_w_update;
+  bool recursive_up;
+
+  bool sync_up;
+
+  void clearBatch();
+
+  std::vector<gmp_::Phase> batch_s;
+  arma::mat batch_Z;
+  std::vector<gmp_::UPDATE_TYPE> batch_type;
+  arma::rowvec batch_r_n;
 
 }; // GMP_Update
 

@@ -1,0 +1,73 @@
+q_start: [-0.382, -1.58, -1.4, -1.41, 0.904, 2.59]
+
+Tf: 12
+
+target_pos: [0.482, -0.0349, 0.17]
+target_tag_id: 0
+target_offset: [ 0.0, 0.105, 0.16 ] # w.r.t. the tag's frame 
+max_ntimes_target_not_detected: 1000
+
+publish_obstacles: true
+
+use_sim: false
+
+publish_path_online: false
+
+obstacle_tags:
+  [
+    { 
+      id: 1 , 
+      name: "hand" ,
+      center: [ 0, -0.05, -0.03 ] , # center of ellipse w.r.t. the tag
+      axes_len: [ 0.06, 0.15, 0.09]  # x, y, z axes of the ellipse w.r.t. the tag frame
+    } ,
+
+    { 
+      id: 2 ,
+      name: "box" ,
+      center:  [ 0, 0, -0.085 ],  # center of ellipse w.r.t. the tag
+      axes_len: [ 0.09, 0.20, 0.22] # x, y, z axes of the ellipse w.r.t. the tag frame
+    }
+
+  ]
+
+pos_lim:
+[
+  [ 0.28 , 0.75],    # [x_min x_max]
+  [ -0.9 , 0.15],    # [y_min y_max]
+  [ 0.01 , 0.45],  # [z_min z_max]
+]
+
+vel_lim:
+[
+  [ -0.25 , 0.25 ]
+]
+
+accel_lim:
+[
+  [ -0.4 , 0.4 ]
+]
+
+
+mpc_settings:
+  {
+    N_horizon: 10 ,
+    pred_time_step: 0.1 ,
+    N_kernels: 30 ,
+    kernels_std_scaling: 1.5 ,
+
+    kernels_trunc_thres: 1e-6 ,
+
+    opt_pos_gain: 1.0 ,
+    opt_vel_gain: 0.0 ,
+
+    final_state_err_tol: [5e-3, 1e-2, 5e-2] ,
+
+    slack_gains: [1e5, 100, 1] , # [1e5, 100, 1]
+    slack_limits: [2e-2, 0.1, 0.5] ,
+
+    time_limit: 0 , #1.8e-3 ,
+    max_iter: 12000 ,
+    abs_tol: 1e-3 ,
+    rel_tol: 1e-5
+  }
