@@ -14,7 +14,7 @@ n_dof = gmp.numOfDoFs();
 
 %% -------- Limits ---------
 pos_lim = [
-    [ -0.2 , 0.65];
+    [ -0.2 , 0.55];
     [ -0.7 , 0.3];
     [ 0.05 , 0.6];
   ];
@@ -32,8 +32,8 @@ opt_vel = (1 - opt_pos);
 %% -------- Initial/Final states ---------
 
 ygd = [0.26, -0.12, 0.32]';   % demo target
-yg = [ 0.55, 0.0817, 0.46 ]'; % execution target
-tau = 3.5; % execution time duration
+yg = [ 0.5, 0.0817, 0.46 ]'; % execution target
+tau = 3.4; % execution time duration
 
 %% to change online the target pose at t = t_g from 'yg0' to 'yg'
 t_g = inf; %0.5*tau;
@@ -94,7 +94,14 @@ end
 
 %% ---------- GMP with repulsive forces ------------
 if (dmp_rf)
-    [Time, P_data, dP_data, ddP_data] = gmpWithRepulsiveForces(gmp, tau, y0, yg0, yg, t_g, pos_lim, vel_lim, accel_lim);
+    
+    global slack_limits
+    p_slack = slack_limits(1) * [-1, 1];
+    v_slack = slack_limits(2) * [-1, 1];
+    a_slack = slack_limits(3) * [-1, 1];
+    
+    disp('GMP with repulsive forces in progress...');
+    [Time, P_data, dP_data, ddP_data] = gmpWithRepulsiveForces(gmp, tau, y0, yg0, yg, t_g, pos_lim+p_slack, vel_lim+v_slack, accel_lim+a_slack);
     data{length(data)+1} = ...
         struct('Time',Time, 'Pos',P_data, 'Vel',dP_data, 'Accel',ddP_data, 'linestyle','-', ...
         'color',[0.93 0.69 0.13], 'legend',['$' 'DMP-RF' '$'], 'plot3D',true, 'plot2D',true);

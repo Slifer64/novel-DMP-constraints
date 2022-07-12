@@ -1,5 +1,5 @@
 clc;
-close all;
+% close all;
 clear;
 
 addpath('utils/');
@@ -101,6 +101,12 @@ ax_fontsize = 14;
 fig = figure;
 fig.Position(3:4) = [842 1110];
 
+global slack_limits
+
+p_slack = slack_limits(1);
+v_slack = slack_limits(2);
+a_slack = slack_limits(3);
+
 % ======== position ==========
 ax = subplot(3,1,1);
 ax_vec = [ax];
@@ -126,6 +132,9 @@ plot(Tf, ygd(i), 'LineWidth', 4, 'LineStyle','none', 'Color','magenta','Marker',
 % plot bounds
 plot(ax.XLim, [pos_lim(i,1) pos_lim(i,1)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
 plot(ax.XLim, [pos_lim(i,2) pos_lim(i,2)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
+% plot hard limits
+plot(ax.XLim, [pos_lim(i,1) pos_lim(i,1)]-p_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+plot(ax.XLim, [pos_lim(i,2) pos_lim(i,2)]+p_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
 % labels, title ...
 ylabel('pos [$m$]', 'interpreter','latex', 'fontsize',label_font);
 %     title(title_{i}, 'interpreter','latex', 'fontsize',18);
@@ -146,6 +155,9 @@ axis tight;
 % plot bounds
 plot(ax.XLim, [vel_lim(i,1) vel_lim(i,1)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
 plot(ax.XLim, [vel_lim(i,2) vel_lim(i,2)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
+% plot hard limits
+plot(ax.XLim, [vel_lim(i,1) vel_lim(i,1)]-v_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+plot(ax.XLim, [vel_lim(i,2) vel_lim(i,2)]+v_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
 ylabel('vel [$m/s$]', 'interpreter','latex', 'fontsize',label_font);
 ax.FontSize = ax_fontsize;
 hold off;
@@ -164,6 +176,9 @@ axis tight;
 % plot bounds
 plot(ax.XLim, [accel_lim(i,1) accel_lim(i,1)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
 plot(ax.XLim, [accel_lim(i,2) accel_lim(i,2)], 'LineWidth',2, 'LineStyle','--', 'Color',[1 0 1]);
+% plot hard limits
+plot(ax.XLim, [accel_lim(i,1) accel_lim(i,1)]-a_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
+plot(ax.XLim, [accel_lim(i,2) accel_lim(i,2)]+a_slack, 'LineWidth',2, 'LineStyle','--', 'Color',[0.5 0.5 0.5], 'HandleVisibility','off');
 ylabel('accel [$m/s^2$]', 'interpreter','latex', 'fontsize',label_font);
 xlabel('time [$s$]', 'interpreter','latex', 'fontsize',label_font);
 ax.FontSize = ax_fontsize;
